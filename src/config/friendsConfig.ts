@@ -24,7 +24,7 @@ export const friendsPageConfig: FriendsPageConfig = {
 export const friendsConfig: FriendLink[] = [
 	{
 		title: "Banapple000",
-		imgurl: "/assets/images/avatar.png",
+		imgurl: "", // 暂时不用头像，等拿到对方正式头像再填（留空则显示首字母占位）
 		desc: "个人博客",
 		siteurl: "https://banapple000.com",
 		tags: ["Blog"],
