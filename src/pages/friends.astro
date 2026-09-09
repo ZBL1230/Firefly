@@ -132,8 +132,8 @@ const description =
                 class="absolute top-3 right-3 text-(--primary) text-lg opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
               />
 
-              {/* 头像：imgurl 为空时用首字母占位，避免损坏图 */}
-              <div class="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-black/5 dark:border-white/5 group-hover:scale-105 transition-transform duration-300">
+              {/* 头像：imgurl 为空时显示「无头像」图标占位，不显示站名首字母 */}
+              <div class="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-black/5 dark:border-white/5 group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
                 {item.imgurl ? (
                   <img
                     src={item.imgurl}
@@ -141,9 +141,10 @@ const description =
                     class="w-full h-full object-cover"
                   />
                 ) : (
-                  <div class="w-full h-full flex items-center justify-center text-(--primary) font-bold text-xl select-none">
-                    {item.title.charAt(0).toUpperCase()}
-                  </div>
+                  <Icon
+                    name="material-symbols:account-circle"
+                    class="text-3xl text-zinc-400 dark:text-zinc-500"
+                  />
                 )}
               </div>
 
