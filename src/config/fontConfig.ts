@@ -86,6 +86,28 @@ export const fontsList: FontDefinition[] = [
 			"monospace",
 		],
 	},
+	// ─── 主页横幅标题：马善政毛笔楷书 ───
+	// 只给横幅标题用的装饰字体。源字体完整中文集约 2.6MB，
+	// 已由 `npx tsx scripts/subset-banner-font.ts` 预裁到横幅文案（约 33KB），
+	// 存为 public/assets/fonts/MaShanZheng-Banner.woff2。
+	// 构建时 scripts/subset-fonts.ts 会在它基础上再子集化一次（体积只会更小）。
+	// ⚠️ 改了 backgroundWallpaper.ts 的横幅文案后，重跑上面那条命令即可。
+	{
+		name: "Ma Shan Zheng",
+		cssVariable: "--font-ma-shan-zheng",
+		provider: "local",
+		options: {
+			variants: [
+				{
+					src: ["./public/assets/fonts/MaShanZheng-Banner.woff2"],
+					// 只有这一个字面。声明为 700 以匹配 .banner-title 的 font-weight: bold，
+					// 否则浏览器会在毛笔笔画上再叠一层合成粗体，笔画会糊。
+					weight: "700",
+				},
+			],
+		},
+		fallbacks: ["sans-serif"],
+	},
 	// ─── 本地字体示例 ───
 	// 使用步骤：
 	// 1. 将 TTF/OTF/WOFF2 字体文件放在 public/assets/fonts/ 目录下
@@ -116,8 +138,8 @@ export const fontConfig: FontSelectionConfig = {
 
 	// 各区域独立字体设置（填写上方 fonts 中的 cssVariable，留空则使用全局 selected 字体）
 	// 例如：bannerTitleFont: "--font-inter", 表示主页横幅主标题使用 Inter 字体
-	// 主页横幅主标题字体
-	bannerTitleFont: "--font-zen-maru-gothic",
+	// 主页横幅主标题字体（马善政毛笔楷书，见上方 fontsList 说明）
+	bannerTitleFont: "--font-ma-shan-zheng",
 	// 主页横幅副标题字体
 	bannerSubtitleFont: "--font-inter",
 	// 导航栏标题字体
@@ -130,6 +152,10 @@ export const fontConfig: FontSelectionConfig = {
 	subsetFonts: {
 		"--font-greatvibes": {
 			// 额外包含的字符
+			extraChars: "",
+		},
+		// 横幅标题字体：源文件已预裁到横幅文案，这里再走一次内置子集化
+		"--font-ma-shan-zheng": {
 			extraChars: "",
 		},
 	},
