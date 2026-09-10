@@ -5,7 +5,7 @@ export const announcementConfig: AnnouncementConfig = {
 	title: "",
 
 	// 公告内容
-	content: "欢迎来到ZBL神奇宝库！一起成长一起进步！",
+	content: "🎉 神奇宝库开放评论啦！对网站有任何建议，或者就想打个招呼，都欢迎来留言板说两句～",
 
 	// 是否允许用户关闭公告
 	closable: true,
@@ -14,9 +14,9 @@ export const announcementConfig: AnnouncementConfig = {
 		// 启用链接
 		enable: true,
 		// 链接文本
-		text: "了解更多",
+		text: "去留言",
 		// 链接 URL
-		url: "/about/",
+		url: "/guestbook/",
 		// 内部链接
 		external: false,
 	},
