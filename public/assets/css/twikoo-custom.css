@@ -277,3 +277,71 @@ body.wallpaper-transparent .twikoo .OwO .OwO-body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+
+/*
+ * OwO 表情面板保底样式
+ * 当 twikoo 自带样式因 CDN 异常未完整加载时，防止面板按原始尺寸平铺
+ * （表现为巨型 emoji 图片 + 颜文字竖排占满整页）
+ */
+.twikoo .OwO {
+  position: relative;
+}
+
+.twikoo .OwO .OwO-body {
+  position: absolute;
+  z-index: 30;
+  top: 100%;
+  left: 0;
+  width: min(100%, 420px);
+  max-height: 280px;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.twikoo .OwO .OwO-items {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 8px;
+  margin: 0;
+  list-style: none;
+}
+
+.twikoo .OwO .OwO-item {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1.2;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.twikoo .OwO .OwO-item img,
+.twikoo .OwO .OwO-item svg {
+  width: 28px;
+  height: 28px;
+  max-width: none;
+  object-fit: contain;
+}
+
+/* 评论区正文 / 预览里的行内表情：保持文字大小，不允许撑开容器 */
+.twikoo img.tk-owo-emotion,
+.twikoo .tk-preview-container img.tk-owo-emotion,
+.twikoo .tk-content img.tk-owo-emotion {
+  display: inline-block;
+  width: 1.6em;
+  height: 1.6em;
+  max-width: none;
+  vertical-align: -0.3em;
+  object-fit: contain;
+}

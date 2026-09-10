@@ -7,7 +7,7 @@ interface Props {
 }
 
 const twikooConfig = commentConfig.twikoo ?? { envId: "" };
-const jsUrl =
+const primaryJsUrl =
 	twikooConfig.jsUrl ||
 	"https://registry.npmmirror.com/twikoo/1.7.13/files/dist/twikoo.min.js";
 const cssUrl = twikooConfig.cssUrl;
@@ -16,12 +16,20 @@ const config = {
 	el: "#tcomment",
 	path: Astro.props.path,
 };
+
+// 从主 CDN 地址提取版本号，生成备用 CDN 列表（版本保持与后端一致）
+const versionMatch = primaryJsUrl.match(/twikoo@?(\d+\.\d+\.\d+)/);
+const version = versionMatch ? versionMatch[1] : "1.7.22";
+const jsSources = [
+	primaryJsUrl,
+	`https://s4.zstatic.net/npm/twikoo@${version}/dist/twikoo.min.js`,
+	`https://cdn.jsdelivr.net/npm/twikoo@${version}/dist/twikoo.min.js`,
+].filter((v, i, arr) => arr.indexOf(v) === i); // 去重
 ---
 
 <div id="tcomment"></div>
-<script is:inline src={jsUrl} defer></script>
 {cssUrl && <link rel="stylesheet" href={cssUrl.startsWith("http") ? cssUrl : url(cssUrl)} />}
-<script is:inline define:vars={{ config }}>
+<script is:inline define:vars={{ config, jsSources }}>
   // 获取当前页面路径
   function getCurrentPath() {
     const requestedPath = new URLSearchParams(window.location.search).get("path");
@@ -41,29 +49,64 @@ const config = {
     };
   }
 
+  // 按 CDN 列表依次尝试加载 twikoo.js（单例，多个调用共享同一个加载结果）
+  let twikooLoadPromise = null;
+  function loadTwikooJs() {
+    if (typeof twikoo !== "undefined") return Promise.resolve();
+    if (twikooLoadPromise) return twikooLoadPromise;
+    twikooLoadPromise = new Promise((resolve, reject) => {
+      let index = 0;
+      const tryNext = function () {
+        if (index >= jsSources.length) {
+          reject(new Error("[Twikoo] 所有 CDN 均加载失败: " + jsSources.join(", ")));
+          return;
+        }
+        const src = jsSources[index++];
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = function () {
+          if (typeof twikoo !== "undefined") {
+            resolve();
+          } else {
+            script.remove();
+            tryNext();
+          }
+        };
+        script.onerror = function () {
+          console.warn("[Twikoo] CDN 加载失败，尝试下一个:", src);
+          script.remove();
+          tryNext();
+        };
+        document.head.appendChild(script);
+      };
+      tryNext();
+    });
+    return twikooLoadPromise;
+  }
+
   // 初始化 Twikoo
   function initTwikoo() {
-    if (typeof twikoo !== "undefined") {
-      const commentEl = document.getElementById("tcomment");
-      if (commentEl) {
+    const commentEl = document.getElementById("tcomment");
+    if (!commentEl) return;
+    loadTwikooJs()
+      .then(function () {
         commentEl.innerHTML = "";
-
         const dynamicConfig = createTwikooConfig();
         console.log("[Twikoo] Init config:", dynamicConfig);
-
         twikoo
           .init(dynamicConfig)
-          .then(() => {
+          .then(function () {
             console.log("[Twikoo] Init complete");
           })
-          .catch((error) => {
+          .catch(function (error) {
             console.error("[Twikoo] Init failed:", error);
           });
-      }
-    } else {
-      // 如果 Twikoo 未加载，稍后重试
-      setTimeout(initTwikoo, 500);
-    }
+      })
+      .catch(function (error) {
+        console.error(error.message);
+        commentEl.innerHTML =
+          '<p style="text-align:center;color:gray">评论加载失败，请检查网络或稍后再试</p>';
+      });
   }
 
   // 页面加载时初始化
