@@ -9,7 +9,7 @@
  * 字体的 fallback 由各字体定义中的 fallbacks 字段控制（Astro Font API 处理），
  */
 import { Font } from "astro:assets";
-import { fontConfig } from "@/config";
+import { fontConfig, selfHostedFonts } from "@/config";
 import { collectUsedFontCssVars } from "@/utils/fontHelper";
 
 // 使用共享的工具函数收集所有需要加载的 CSS 变量名（selected + 各区域字体，去重）
@@ -35,11 +35,23 @@ const SYSTEM_FONT_STACK =
 const MONO_FONT_STACK =
 	'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
 const selectedFontVars = selectedIds.filter((v) => v !== "system");
+
+// 自托管分片字体（如中文正文的霞鹜文楷）：由 public/ 下的静态 CSS 提供 @font-face。
+// 位置在 selected 字体之后、系统字体之前 —— 拉丁字符优先用 selected 字体，
+// 中文/日文命中分片字体，最后才是系统兜底。
+const selfHostedCss = fontConfig.enable ? selfHostedFonts : [];
+const selfHostedStack = selfHostedCss.flatMap((f) => [
+	`"${f.family}"`,
+	...(f.fallbacks ?? []),
+]);
+
 const bodyFontFamily =
-	selectedFontVars.length > 0
-		? [...selectedFontVars.map((v) => `var(${v})`), SYSTEM_FONT_STACK].join(
-				", ",
-			)
+	selectedFontVars.length > 0 || selfHostedStack.length > 0
+		? [
+				...selectedFontVars.map((v) => `var(${v})`),
+				...selfHostedStack,
+				SYSTEM_FONT_STACK,
+			].join(", ")
 		: SYSTEM_FONT_STACK;
 
 // 各区域字体 CSS 变量值
@@ -53,6 +65,12 @@ const navbarTitleFontVar = fontConfig.enable
 	? fontConfig.navbarTitleFont || ""
 	: "";
 const codeFontVar = fontConfig.enable ? fontConfig.codeFont || "" : "";
+
+// 区域字体（横幅标题/副标题、导航栏标题）在所选字体之后追加自托管中文字体作为回退。
+// 原因：Zen Maru Gothic、Inter 这类字体只带拉丁/西里尔字形，中文会直接掉到系统字体，
+// 导致「配了字体但中文没变」的错觉。追加后：拉丁走各自字体，中文统一走霞鹜文楷。
+const cjkFallbackSuffix =
+	selfHostedStack.length > 0 ? `, ${selfHostedStack.join(", ")}` : "";
 // --font-code 由 fontConfig.codeFont 决定，行内代码和代码块统一引用它
 // 末尾始终带 MONO_FONT_STACK 保底，避免 codeFont 为空时 var() 解析失败导致字体回退到正文字体
 const codeFontFamily = codeFontVar
@@ -68,15 +86,18 @@ const codeFontFamily = codeFontVar
   />
 ))}
 
+<!-- 自托管分片字体（中文字体，见 fontConfig.ts 的 selfHostedFonts） -->
+{selfHostedCss.map((f) => <link rel="stylesheet" href={f.cssHref} />)}
+
 <!-- 区域字体 CSS 变量 + body 字体 -->
 <!-- --font-code 无条件输出，即使关闭自定义字体，行内代码和代码块也要保持等宽字体 -->
 <style
   set:html={`
   :root {
     --font-code: ${codeFontFamily};
-    ${bannerTitleFontVar ? `--font-banner-title: var(${bannerTitleFontVar}, inherit);` : ""}
-    ${bannerSubtitleFontVar ? `--font-banner-subtitle: var(${bannerSubtitleFontVar}, inherit);` : ""}
-    ${navbarTitleFontVar ? `--font-navbar-title: var(${navbarTitleFontVar}, inherit);` : ""}
+    ${bannerTitleFontVar ? `--font-banner-title: var(${bannerTitleFontVar})${cjkFallbackSuffix};` : ""}
+    ${bannerSubtitleFontVar ? `--font-banner-subtitle: var(${bannerSubtitleFontVar})${cjkFallbackSuffix};` : ""}
+    ${navbarTitleFontVar ? `--font-navbar-title: var(${navbarTitleFontVar})${cjkFallbackSuffix};` : ""}
   }
 
   ${
@@ -84,7 +105,8 @@ const codeFontFamily = codeFontVar
 		(bannerTitleFontVar ||
 			bannerSubtitleFontVar ||
 			navbarTitleFontVar ||
-			selectedFontVars.length > 0)
+			selectedFontVars.length > 0 ||
+			selfHostedStack.length > 0)
 			? `body {
       font-family: ${bodyFontFamily};
     }`

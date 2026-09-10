@@ -54,6 +54,25 @@ export type FontDefinition = {
 	};
 };
 
+/**
+ * 自托管网络字体（不走 Astro Font API）
+ *
+ * 适用于分片（unicode-range）webfont：中文字体动辄数 MB，拆成上百个小分片后
+ * 浏览器只下载当前页面真正用到的部分，既保证字符全覆盖又不拖慢首屏。
+ *
+ * 这类字体由 public/ 下的静态 CSS 提供 @font-face，
+ * FontSetup.astro 会把 cssHref 注入 <head>，并把 family 插到 body 字体栈中
+ * （位于 selected 字体之后、系统字体之前）。
+ */
+export type SelfHostedFont = {
+	/** 字体家族名，需与 CSS 中 @font-face 的 font-family 完全一致 */
+	family: string;
+	/** public 目录下静态 CSS 的绝对路径，如 "/assets/fonts/xx/xx.css" */
+	cssHref: string;
+	/** 该字体之后的回退字体（可选），用于兜底生僻字 */
+	fallbacks?: string[];
+};
+
 export type FontSelectionConfig = {
 	/** 是否启用自定义字体功能 */
 	enable: boolean;
