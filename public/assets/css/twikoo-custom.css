@@ -345,3 +345,57 @@ body.wallpaper-transparent .twikoo .OwO .OwO-body {
   vertical-align: -0.3em;
   object-fit: contain;
 }
+
+/*
+ * 保底尺寸（带 !important）
+ * Twikoo 的样式是运行时注入的，CDN 异常时可能整体缺失，
+ * 导致默认头像 / 表情图片按 SVG 原始尺寸渲染成巨图。这里全部锁死。
+ */
+.twikoo .tk-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  flex: 0 0 40px !important;
+  overflow: hidden;
+}
+
+.twikoo .tk-avatar .tk-avatar-img,
+.twikoo .tk-avatar img {
+  width: 40px !important;
+  height: 40px !important;
+  max-width: none !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+.twikoo .OwO .OwO-item img,
+.twikoo .OwO .OwO-item svg {
+  width: 28px !important;
+  height: 28px !important;
+  max-width: none !important;
+}
+
+/* 预览区里的普通图片：限制在容器内，不允许原尺寸爆版 */
+.twikoo .tk-preview-container img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 头像行 / 提交区布局保底：头像不被挤压变形 */
+.twikoo .tk-submit,
+.twikoo .tk-row {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.twikoo .tk-meta-input {
+  display: flex;
+  flex: 1 1 240px;
+  min-width: 0;
+  gap: 8px;
+}
+
+.twikoo .tk-meta-input .el-input {
+  flex: 1 1 0;
+  min-width: 0;
+}
