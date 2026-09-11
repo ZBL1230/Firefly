@@ -9,7 +9,8 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 	showInSidebar: true,
 
 	// 使用方式："meting" 使用 Meting API，"local" 使用本地音乐列表
-	mode: "local",
+	// 2026-09-11 切 meting：QQ 音乐歌单 8523075134（211 首周杰伦），实测 url/lrc/pic 全通
+	mode: "meting",
 
 	// 默认音量 (0-1)
 	volume: 0.7,
@@ -23,19 +24,19 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 	// Meting API 配置
 	meting: {
 		// Meting API 地址
-		// 默认使用官方 API，也可以使用自定义 API
-		api: "https://api.i-meto.com/meting/api?server=:server&type=:type&id=:id&r=:r",
+		// 第三方公共 API（大陆部署，tencent 解析实测可用）；若哪天挂了，换回官方 API 或改回 mode:"local"
+		api: "https://meting.mikus.ink/api?server=:server&type=:type&id=:id&r=:r",
 		// 音乐平台：netease=网易云音乐, tencent=QQ音乐, kugou=酷狗音乐, xiami=虾米音乐, baidu=百度音乐
-		server: "netease",
+		server: "tencent",
 		// 类型：song=单曲, playlist=歌单, album=专辑, search=搜索, artist=艺术家
 		type: "playlist",
 		// 歌单/专辑/单曲 ID 或搜索关键词
-		id: "10046455237",
+		id: "8523075134",
 		// 认证 token（可选）
 		auth: "",
-		// 备用 API 配置（当主 API 失败时使用）
+		// 备用 API 配置（主 API 失败时兜底，至少保证歌单能列出）
+		// 注：injahow 2026-09-11 测试已超时，故移除；moeyao 的 tencent url 仍是坏的，仅 playlist/lrc 能用
 		fallbackApis: [
-			"https://api.injahow.cn/meting/?server=:server&type=:type&id=:id",
 			"https://api.moeyao.cn/meting/?server=:server&type=:type&id=:id",
 		],
 	},
