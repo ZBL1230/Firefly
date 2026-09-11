@@ -28,6 +28,15 @@ const jsSources = [
 ---
 
 <div id="tcomment"></div>
+{/*
+  twikoo.css 静态引入（2026-09-11）：
+  twikoo.min.js 原本在运行时把整套样式注入 <head>，但 swup 的 head 插件
+  （astro.config.mjs updateHead: true，persistAssets: false）每次换页都会把
+  "旧页面有、新页面没有"的 head 标签删掉，运行时注入的 <style> 因此被清空且
+  不会重新注入 → 经 swup 换页进入的评论区整页裸奔（巨型笑脸/巨环/原生文件按钮）。
+  静态 <link> 在新旧页面 outerHTML 一致，不会被 swup 删除。版本与后端保持一致。
+*/}
+<link rel="stylesheet" href={`https://registry.npmmirror.com/twikoo/${version}/files/dist/twikoo.css`} />
 {cssUrl && <link rel="stylesheet" href={cssUrl.startsWith("http") ? cssUrl : url(cssUrl)} />}
 <script is:inline define:vars={{ config, jsSources }}>
   // 获取当前页面路径

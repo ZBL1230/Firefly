@@ -374,6 +374,59 @@ body.wallpaper-transparent .twikoo .OwO .OwO-body {
   max-width: none !important;
 }
 
+/*
+ * 提交栏图标保底（巨型笑脸爆版修复）
+ * 病根：Twikoo 靠 twikoo.min.js 运行时往 <head> 注入 <style>，其中
+ *   .twikoo svg { width:100%; height:100% }
+ * 负责把所有图标 svg 缩到父容器大小。表情按钮的 svg 是
+ * viewBox="0 0 512 512" 且标签上没有任何 width/height——
+ * 一旦注入的样式没就位（CDN 慢/回退、swup 换页重初始化时序），
+ * 它就按原始尺寸爆开成巨图。这里用随页面静态加载的 CSS 复刻同款规则 + 锁死按钮尺寸。
+ */
+.twikoo svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.twikoo .tk-submit-action-icon,
+.twikoo .tk-icon.__comments {
+  width: 1.25em !important;
+  height: 1.25em !important;
+  line-height: 0 !important;
+  flex-shrink: 0;
+}
+
+/* 评论列表里的赞/踩图标：twikoo 自带 1em 规则，注入缺失时同病根 */
+.twikoo .tk-action-icon {
+  width: 1em !important;
+  height: 1em !important;
+  line-height: 0 !important;
+  flex-shrink: 0;
+}
+
+/* 加载转圈保底：twikoo 自带 42px，注入缺失时上面的 svg 100% 规则会把它
+   放大成占满评论区的巨型圆环（主题色 stroke），这里锁死尺寸 */
+.twikoo .el-loading-spinner .circular {
+  width: 42px !important;
+  height: 42px !important;
+}
+
+/* 图片上传的隐藏 file input：twikoo 自带 display:none，
+   注入缺失时会裸奔成原生"选择文件 未选择文件"控件 */
+.twikoo .tk-input-image {
+  display: none !important;
+}
+
+/* OwO 开关（表情按钮的脸）：铺满上面的 1.25em 容器。
+   注意 overflow:hidden 只能加在 .OwO-logo 上——加在 .OwO 容器上会把下拉面板裁掉 */
+.twikoo .OwO .OwO-logo {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+}
+
 /* 预览区里的普通图片：限制在容器内，不允许原尺寸爆版 */
 .twikoo .tk-preview-container img {
   max-width: 100%;
@@ -388,9 +441,15 @@ body.wallpaper-transparent .twikoo .OwO .OwO-body {
   min-width: 0;
 }
 
+/*
+ * 注意：.tk-meta-input 在桌面端位于列方向的 .tk-col 里（头像/表单/文本域垂直排列），
+ * 这里 flex-basis 是"高度"不是宽度——绝不能写 flex: 1 1 240px，
+ * 否则整行被拉高 240px，prepend 标签单元格（table-cell）会撑成绿色长条。
+ */
 .twikoo .tk-meta-input {
   display: flex;
-  flex: 1 1 240px;
+  flex: 0 0 auto;
+  align-items: center;
   min-width: 0;
   gap: 8px;
 }
@@ -398,4 +457,10 @@ body.wallpaper-transparent .twikoo .OwO .OwO-body {
 .twikoo .tk-meta-input .el-input {
   flex: 1 1 0;
   min-width: 0;
+}
+
+/* prepend 标签单元格保底：固定内容高度，不允许换行撑宽 */
+.twikoo .tk-meta-input .el-input-group__prepend {
+  height: auto;
+  white-space: nowrap;
 }
